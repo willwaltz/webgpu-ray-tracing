@@ -1,0 +1,17 @@
+--- a/tools/typescript/ts_library.py
++++ b/tools/typescript/ts_library.py
+@@ -362,6 +362,14 @@
+ 
+   files_list = out.split('\n')
+   definitions_files = list(filter(lambda f: f.endswith('.d.ts'), files_list))
++  # Ignore definitions that TypeScript found by walking up into node_modules
++  # folders above the source tree (e.g. one in the user's home directory);
++  # they are not part of the build.
++  src_root = os.path.abspath(_SRC_DIR) + os.sep
++  definitions_files = [
++      f for f in definitions_files
++      if os.path.abspath(os.path.join(_CWD, f)).startswith(src_root)
++  ]
+   definitions = args.definitions if args.definitions is not None else []
+   list_valid, error_msg = validateDefinitionDeps(
+     definitions_files, target_path, args.gen_dir, args.root_gen_dir, definitions
